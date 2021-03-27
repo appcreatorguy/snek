@@ -6,15 +6,17 @@ using CodeMonkey.Utils;
 
 public class GameHandler : MonoBehaviour
 {
-    // Start is called before the first frame update
+
+    [SerializeField] private Snake snake;
+
+    private LevelGrid levelGrid;
     void Start()
     {
         Debug.Log("GameHandler.Start()");
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        levelGrid = new LevelGrid(20, 20);
+
+        snake.Setup(levelGrid);
+        levelGrid.Setup(snake);
     }
 }

@@ -16,11 +16,18 @@ public class Snake : MonoBehaviour
     private Touch touch;
     private Vector2 touchStartPosition, touchEndPosition;
     private int dirIndex = 2;
+    private LevelGrid levelGrid;
+
+    public void Setup (LevelGrid levelGrid)
+    {
+        this.levelGrid = levelGrid;
+        Debug.Log("Setup!");
+    }
 
     private void Awake()
     {
         gridPosition = new Vector2Int(10, 10);
-        gridMoveTimerMax = .25f;
+        gridMoveTimerMax = .375f;
         gridMoveTimer = gridMoveTimerMax;
         gridMoveDirection = new Vector2Int(1, 0);
     }
@@ -176,6 +183,8 @@ public class Snake : MonoBehaviour
             
             transform.position = new Vector3(gridPosition.x, gridPosition.y);
             transform.eulerAngles = new Vector3(0, 0, GetAngleFromVector(gridMoveDirection) - 90); // - 90 as unity thinks of up as 90deg.
+
+            levelGrid.SnakeMoved(gridPosition);
         }
     }
 
@@ -185,5 +194,10 @@ public class Snake : MonoBehaviour
         float n = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         if (n < 0) n += 360;
         return n;
+    }
+
+    public Vector2Int GetGridPosition()
+    {
+        return gridPosition;
     }
 }
