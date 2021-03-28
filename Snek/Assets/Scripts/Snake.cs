@@ -6,7 +6,7 @@ using CodeMonkey.Utils;
 
 public class Snake : MonoBehaviour
 {
-    public int touchSensitivity = 20;
+    public int touchSensitivity = 15;
     public bool singleTouchMovement = false;
 
     private Vector2Int gridMoveDirection;
@@ -17,6 +17,8 @@ public class Snake : MonoBehaviour
     private Vector2 touchStartPosition, touchEndPosition;
     private int dirIndex = 2;
     private LevelGrid levelGrid;
+    private int snakeBodySize;
+    private List<Vector2Int> snakeMovePositionList;
 
     public void Setup (LevelGrid levelGrid)
     {
@@ -27,9 +29,12 @@ public class Snake : MonoBehaviour
     private void Awake()
     {
         gridPosition = new Vector2Int(10, 10);
-        gridMoveTimerMax = .375f;
+        gridMoveTimerMax = .9f;
         gridMoveTimer = gridMoveTimerMax;
         gridMoveDirection = new Vector2Int(1, 0);
+
+        snakeMovePositionList = new List<Vector2Int>();
+        snakeBodySize = 3;
     }
 
     private void Update()
@@ -179,12 +184,35 @@ public class Snake : MonoBehaviour
         if (gridMoveTimer >= gridMoveTimerMax)
         {
             gridMoveTimer -= gridMoveTimerMax;
+
+            snakeMovePositionList.Insert(0, gridPosition);
+
             gridPosition += gridMoveDirection;
+
+            bool snakeAteFood = levelGrid.TrySnakeEatFood(gridPosition);
+            if (snakeAteFood)
+            {
+                // Snake Ate food, grow body
+                snakeBodySize++;
+                float speedChange = .05f;
+                gridMoveTimerMax -= speedChange;
+                speedChange -= 0.005f;
+            }
             
+            if (snakeMovePositionList.Count >= snakeBodySize + 1)
+            {
+                snakeMovePositionList.RemoveAt(snakeMovePositionList.Count - 1);
+            }
+
+            for (int i = 0; i < snakeMovePositionList.Count; i++)
+            {
+                Vector2Int snakeMovePosition = snakeMovePositionList[i];
+                World_Sprite worldSprite = World_Sprite.Create(new Vector3(snakeMovePosition.x, snakeMovePosition.y), Vector3.one * .5f, Color.white);
+                FunctionTimer.Create(worldSprite.DestroySelf, gridMoveTimerMax);
+            }
+
             transform.position = new Vector3(gridPosition.x, gridPosition.y);
             transform.eulerAngles = new Vector3(0, 0, GetAngleFromVector(gridMoveDirection) - 90); // - 90 as unity thinks of up as 90deg.
-
-            levelGrid.SnakeMoved(gridPosition);
         }
     }
 
@@ -200,4 +228,13 @@ public class Snake : MonoBehaviour
     {
         return gridPosition;
     }
+
+    // Return the full list of positions occupied by the snake: Head & Body
+    public List<Vector2Int> GetFullSnakeGridPositionList()
+    {
+        List<Vector2Int> gridPositionList = new List<Vector2Int> { gridPosition };
+        gridPositionList.AddRange(snakeMovePositionList);
+        return gridPositionList;
+    }
+
 }
