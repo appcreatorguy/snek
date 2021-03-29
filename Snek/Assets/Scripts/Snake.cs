@@ -8,14 +8,14 @@ public class Snake : MonoBehaviour
 {
     public int touchSensitivity = 15;
     public bool singleTouchMovement = false;
+    private Touch touch;
+    private Vector2 touchStartPosition, touchEndPosition;
+    private int dirIndex = 2;
 
     private Vector2Int gridMoveDirection;
     private Vector2Int gridPosition;
     private float gridMoveTimer;
     private float gridMoveTimerMax;
-    private Touch touch;
-    private Vector2 touchStartPosition, touchEndPosition;
-    private int dirIndex = 2;
     private LevelGrid levelGrid;
     private int snakeBodySize;
     private List<Vector2Int> snakeMovePositionList;
@@ -24,7 +24,6 @@ public class Snake : MonoBehaviour
     public void Setup (LevelGrid levelGrid)
     {
         this.levelGrid = levelGrid;
-        Debug.Log("Setup!");
     }
 
     private void Awake()
@@ -195,11 +194,11 @@ public class Snake : MonoBehaviour
             bool snakeAteFood = levelGrid.TrySnakeEatFood(gridPosition);
             if (snakeAteFood)
             {
-                // Snake Ate food, grow body
-                snakeBodySize++;
                 float speedChange = .05f;
                 gridMoveTimerMax -= speedChange;
                 speedChange /= 5;
+                // Snake Ate food, grow body
+                snakeBodySize++;
                 CreateSnakeBodyPart();
             }
             
@@ -233,7 +232,7 @@ public class Snake : MonoBehaviour
         {
             snakeBodyPartList[i].SetGridPosition(snakeMovePositionList[i]);
         }
-    }
+    }   
 
     // Function to calculate angle from origin intersecting a given point.
     private float GetAngleFromVector(Vector2Int dir)
@@ -251,7 +250,7 @@ public class Snake : MonoBehaviour
     // Return the full list of positions occupied by the snake: Head & Body
     public List<Vector2Int> GetFullSnakeGridPositionList()
     {
-        List<Vector2Int> gridPositionList = new List<Vector2Int> { gridPosition };
+        List<Vector2Int> gridPositionList = new List<Vector2Int>() { gridPosition };
         gridPositionList.AddRange(snakeMovePositionList);
         return gridPositionList;
     }
@@ -261,6 +260,7 @@ public class Snake : MonoBehaviour
 
     private class SnakeBodyPart
     {
+
         private Vector2Int gridPosition;
         private Transform transform;
 
@@ -268,7 +268,8 @@ public class Snake : MonoBehaviour
         {
             GameObject snakeBodyGameObject = new GameObject("SnakeBody", typeof(SpriteRenderer));
             snakeBodyGameObject.GetComponent<SpriteRenderer>().sprite = GameAssets.instance.snakeBodySprite;
-            snakeBodyGameObject.GetComponent<SpriteRenderer>().sortingOrder = -bodyIndex;
+            snakeBodyGameObject.GetComponent<SpriteRenderer>().sortingOrder = -1 - bodyIndex;
+            transform = snakeBodyGameObject.transform;
         }
 
         public void SetGridPosition(Vector2Int gridPosition)
@@ -276,5 +277,6 @@ public class Snake : MonoBehaviour
             this.gridPosition = gridPosition;
             transform.position = new Vector3(gridPosition.x, gridPosition.y);
         }
+
     }
 }
