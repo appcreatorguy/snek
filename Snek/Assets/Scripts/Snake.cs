@@ -42,6 +42,7 @@ public class Snake : MonoBehaviour
 
     private void Awake()
     {
+        gameObject.GetComponent<SpriteRenderer>().sprite = GameAssets.instance.snakeHeadSprite;
         gridPosition = new Vector2Int(10, 10);
         gridMoveTimerMax = .55f;
         gridMoveTimer = gridMoveTimerMax;
